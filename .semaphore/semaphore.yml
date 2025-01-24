@@ -1,19 +1,15 @@
-# This is a simple Semaphore configuration file using Docker
+# This is a simple Semaphore configuration file
 # For more information about Semaphore configuration visit:
 # https://docs.semaphoreci.com/reference/pipeline-yaml-reference/
 
 version: v1.0  # Semaphore configuration version
 name: "🎯 Simple CI Pipeline"  # Pipeline display name
 
-# Define the machine type, OS image, and containers
+# Define the machine type and OS image
 agent:
   machine:
     type: s1-testy
     os_image: ubuntu2004
-
-  containers:
-    - name: main
-      image: 'registry.semaphoreci.com/node:20'  # Node.js 20 container
 
 # Configure when to stop the pipeline early
 fail_fast:
@@ -35,31 +31,17 @@ blocks:
           commands:
             - echo "Checking out code..."
             - echo "Installing dependencies..."
-            - echo "Running test suite in container..."
+            - echo "Running test suite..."
             - echo "Tests completed successfully!"
-
-  # Block for building Docker image
-  - name: "🐳 Docker"
-    dependencies: ["🧪 Test"]
-    task:
-      secrets:
-        - name: dockerhub-credentials
-      jobs:
-        - name: "📦 Build and Push"
-          commands:
-            - echo "Logging into Docker registry..."
-            - echo "Building Docker image..."
-            - echo "Pushing image to registry..."
-            - echo "Docker image published successfully!"
 
   # Block for deployment
   - name: "🚀 Deploy"
-    dependencies: ["🐳 Docker"]  # Only deploy if Docker build succeeds
+    dependencies: ["🧪 Test"]  # Only deploy if tests pass
     task:
       jobs:
-        - name: "🌍 Deploy to Production"
+        - name: "📦 Deploy to Production"
           commands:
-            - echo "Preparing deployment..."
-            - echo "Updating container version..."
-            - echo "Rolling out new containers..."
+            - echo "Building application..."
+            - echo "Running security checks..."
+            - echo "Deploying to production..."
             - echo "Deployment completed successfully!"
