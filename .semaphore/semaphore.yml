@@ -1,9 +1,9 @@
-# This is a simple Semaphore configuration file
+# This is a Semaphore configuration file demonstrating promotions
 # For more information about Semaphore configuration visit:
 # https://docs.semaphoreci.com/reference/pipeline-yaml-reference/
 
 version: v1.0  # Semaphore configuration version
-name: "🎯 Simple CI Pipeline"  # Pipeline display name
+name: "🎭 Promotion Pipeline"  # Pipeline display name
 
 # Define the machine type and OS image
 agent:
@@ -29,19 +29,27 @@ blocks:
       jobs:
         - name: "🟢 Run Tests"
           commands:
-            - echo "Checking out code..."
-            - echo "Installing dependencies..."
             - echo "Running test suite..."
             - echo "Tests completed successfully!"
 
-  # Block for deployment
-  - name: "🚀 Deploy"
-    dependencies: ["🧪 Test"]  # Only deploy if tests pass
+  # Block for staging build
+  - name: "📦 Build Staging"
+    dependencies: ["🧪 Test"]
     task:
       jobs:
-        - name: "📦 Deploy to Production"
+        - name: "🔨 Build for Staging"
           commands:
-            - echo "Building application..."
-            - echo "Running security checks..."
-            - echo "Deploying to production..."
-            - echo "Deployment completed successfully!"
+            - echo "Building staging artifacts..."
+            - echo "Build completed successfully!"
+
+promotions:
+  # Promotion to staging environment
+  - name: "🚀 Deploy to Staging"
+    pipeline_file: "promotions/staging.yml"
+    auto_promote:
+      when: "branch = 'main' AND result = 'passed'"
+
+  # Promotion to production environment (requires manual approval)
+  - name: "🌟 Deploy to Production"
+    pipeline_file: "promotions/production.yml"
+    auto_promote: false  # Requires manual approval
